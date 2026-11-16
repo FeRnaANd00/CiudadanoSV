@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns="https://jakarta.ee/xml/ns/jakartaee"
+   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+   xsi:schemaLocation="https://jakarta.ee/xml/ns/jakartaee https://jakarta.ee/xml/ns/jakartaee/web-app_6_1.xsd"
+   version="6.1">
+
+    <!-- Acentos y ñ correctos en formularios y respuestas -->
+    <request-character-encoding>UTF-8</request-character-encoding>
+    <response-character-encoding>UTF-8</response-character-encoding>
+
+    <!-- Carpeta donde se guardan los archivos que suben los ciudadanos.
+         Vacío = C:\Users\<usuario>\CiudadanoSV-archivos (fuera del proyecto, no se borra al redesplegar) -->
+    <context-param>
+        <param-name>ciudadanosv.rutaArchivos</param-name>
+        <param-value></param-value>
+    </context-param>
+
+    <!-- ===== Seguridad: zonas privadas ===== -->
+    <!-- /app/*   -> requiere sesión   |   /admin/* -> requiere sesión de funcionario -->
+    <filter>
+        <filter-name>AutenticacionFilter</filter-name>
+        <filter-class>com.mycompany.ciudadanosv.filters.AutenticacionFilter</filter-class>
+    </filter>
+    <filter-mapping>
+        <filter-name>AutenticacionFilter</filter-name>
+        <url-pattern>/app/*</url-pattern>
+        <url-pattern>/admin/*</url-pattern>
+    </filter-mapping>
+
+    <!-- ===== Controladores públicos ===== -->
+    <servlet>
+        <servlet-name>InicioController</servlet-name>
+        <servlet-class>com.mycompany.ciudadanosv.controllers.InicioController</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>LoginController</servlet-name>
+        <servlet-class>com.mycompany.ciudadanosv.controllers.LoginController</servlet-class>
+    </servlet>
+
+    <!-- ===== Controladores del ciudadano (/app) ===== -->
+    <servlet>
+        <servlet-name>TramiteController</servlet-name>
+        <servlet-class>com.mycompany.ciudadanosv.controllers.TramiteController</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>SolicitudPartidaController</servlet-name>
+        <servlet-class>com.mycompany.ciudadanosv.controllers.SolicitudPartidaController</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>SolicitudEnviadaController</servlet-name>
+        <servlet-class>com.mycompany.ciudadanosv.controllers.SolicitudEnviadaController</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>MisSolicitudesController</servlet-name>
+        <servlet-class>com.mycompany.ciudadanosv.controllers.MisSolicitudesController</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>DetalleSolicitudController</servlet-name>
+        <servlet-class>com.mycompany.ciudadanosv.controllers.DetalleSolicitudController</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>SolicitudMunicipalController</servlet-name>
+        <servlet-class>com.mycompany.ciudadanosv.controllers.SolicitudMunicipalController</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>SolicitudDuiController</servlet-name>
+        <servlet-class>com.mycompany.ciudadanosv.controllers.SolicitudDuiController</servlet-class>
+        <!-- Formulario con archivos: máx. 5 MB por archivo y 12 MB por envío -->
+        <multipart-config>
+            <max-file-size>5242880</max-file-size>
+            <max-request-size>12582912</max-request-size>
+            <file-size-threshold>1048576</file-size-threshold>
+        </multipart-config>
+    </servlet>
+    <servlet>
+        <servlet-name>DocumentoController</servlet-name>
+        <servlet-class>com.mycompany.ciudadanosv.controllers.DocumentoController</servlet-class>
+    </servlet>
+
+    <!-- ===== Controladores de administración (/admin) ===== -->
+    <servlet>
+        <servlet-name>AdminInicioController</servlet-name>
+        <servlet-class>com.mycompany.ciudadanosv.controllers.AdminInicioController</servlet-class>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>InicioController</servlet-name>
+        <url-pattern>/inicio</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>LoginController</servlet-name>
+        <url-pattern>/login</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>TramiteController</servlet-name>
+        <url-pattern>/app/tramite</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>SolicitudPartidaController</servlet-name>
+        <url-pattern>/app/solicitud/partida</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>SolicitudEnviadaController</servlet-name>
+        <url-pattern>/app/solicitud/enviada</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>MisSolicitudesController</servlet-name>
+        <url-pattern>/app/solicitudes</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>DetalleSolicitudController</servlet-name>
+        <url-pattern>/app/solicitud</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>SolicitudMunicipalController</servlet-name>
+        <url-pattern>/app/solicitud/municipal</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>SolicitudDuiController</servlet-name>
+        <url-pattern>/app/solicitud/dui</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>DocumentoController</servlet-name>
+        <url-pattern>/app/documento</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>AdminInicioController</servlet-name>
+        <url-pattern>/admin/inicio</url-pattern>
+    </servlet-mapping>
+
+    <!-- ===== Páginas de error ===== -->
+    <error-page>
+        <error-code>403</error-code>
+        <location>/WEB-INF/vistas/error.jsp</location>
+    </error-page>
+    <error-page>
+        <error-code>404</error-code>
+        <location>/WEB-INF/vistas/error.jsp</location>
+    </error-page>
+    <error-page>
+        <error-code>500</error-code>
+        <location>/WEB-INF/vistas/error.jsp</location>
+    </error-page>
+
+    <!-- Todas las vistas y fragmentos (.jspf) se leen en UTF-8 -->
+    <jsp-config>
+        <jsp-property-group>
+            <url-pattern>*.jsp</url-pattern>
+            <url-pattern>*.jspf</url-pattern>
+            <page-encoding>UTF-8</page-encoding>
+            <trim-directive-whitespaces>true</trim-directive-whitespaces>
+        </jsp-property-group>
+    </jsp-config>
+
+    <welcome-file-list>
+        <welcome-file>index.jsp</welcome-file>
+    </welcome-file-list>
+
+    <session-config>
+        <session-timeout>
+            30
+        </session-timeout>
+    </session-config>
+</web-app>

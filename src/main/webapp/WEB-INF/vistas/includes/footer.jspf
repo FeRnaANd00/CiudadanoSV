@@ -1,0 +1,8 @@
+<%-- Pie de página común --%>
+<footer class="mt-auto border-t border-surface-container bg-surface-container-lowest">
+  <div class="mx-auto max-w-6xl px-4 sm:px-6 py-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-center sm:text-left">
+    <p class="text-caption text-secondary">
+      CiudadanoSV v2.4 &bull; Dirección de Transformación Digital (Entorno Académico Demostrativo)
+    </p>
+  </div>
+</footer>

@@ -1,0 +1,75 @@
+<%-- Encabezado del portal. Requiere el taglib "c". --%>
+<c:set var="ctx" value="${pageContext.request.contextPath}"/>
+<header class="sitio-header">
+  <div class="mx-auto max-w-6xl px-4 sm:px-6 min-h-16 py-2 flex items-center justify-between gap-3">
+    <a href="${ctx}/inicio" class="flex items-center gap-3 min-w-0">
+      <span class="w-10 h-10 rounded-xl bg-primary flex items-center justify-center shrink-0">
+        <span class="material-symbols-outlined icono-relleno text-tertiary-fixed text-[22px]">verified</span>
+      </span>
+      <span class="flex flex-col min-w-0">
+        <span class="text-caption uppercase tracking-wider font-semibold text-secondary truncate">Portal de Servicios Digitales</span>
+        <span class="text-lg font-bold text-primary leading-tight">Ciudadano<span class="text-primary-container">SV</span></span>
+      </span>
+    </a>
+
+    <c:choose>
+      <c:when test="${not empty sessionScope.usuario}">
+        <c:set var="u" value="${sessionScope.usuario}"/>
+        <nav class="flex items-center gap-1 sm:gap-2" aria-label="Menú principal">
+          <a class="boton-borde hidden md:inline-flex" href="${ctx}/inicio#servicios">
+            <span class="material-symbols-outlined text-[18px]">apps</span><span>Servicios</span>
+          </a>
+          <c:if test="${u.funcionario}">
+            <a class="boton-borde hidden md:inline-flex" href="${ctx}/admin/inicio">
+              <span class="material-symbols-outlined text-[18px]">admin_panel_settings</span><span>Administración</span>
+            </a>
+          </c:if>
+
+          <%-- Menú de la cuenta (desplegable sin JavaScript) --%>
+          <details class="menu-cuenta relative">
+            <summary class="boton-borde cursor-pointer list-none" aria-label="Menú de la cuenta">
+              <span class="material-symbols-outlined text-[20px]">account_circle</span>
+              <span class="hidden sm:inline"><c:out value="${u.primerNombre}"/></span>
+              <span class="material-symbols-outlined text-[18px]">expand_more</span>
+            </summary>
+            <div class="absolute right-0 mt-2 w-64 rounded-xl border border-surface-container bg-surface-container-lowest p-2 shadow-lg z-50">
+              <div class="px-3 py-2 border-b border-surface-container mb-1">
+                <p class="text-label-md text-on-surface truncate"><c:out value="${u.nombreCompleto}"/></p>
+                <p class="text-caption text-secondary mt-0.5">DUI <c:out value="${u.dui}"/> &bull; <c:out value="${u.rolTexto}"/></p>
+              </div>
+              <a class="menu-item md:hidden" href="${ctx}/inicio#servicios">
+                <span class="material-symbols-outlined text-[18px]">apps</span> Servicios
+              </a>
+              <c:if test="${u.funcionario}">
+                <a class="menu-item md:hidden" href="${ctx}/admin/inicio">
+                  <span class="material-symbols-outlined text-[18px]">admin_panel_settings</span> Administración
+                </a>
+              </c:if>
+              <a class="menu-item" href="${ctx}/app/solicitudes">
+                <span class="material-symbols-outlined text-[18px]">folder_open</span> Mis solicitudes
+              </a>
+              <span class="menu-item opacity-50 cursor-not-allowed" title="Disponible en el paso 8">
+                <span class="material-symbols-outlined text-[18px]">notifications</span> Notificaciones
+              </span>
+              <span class="menu-item opacity-50 cursor-not-allowed" title="Disponible en el paso 9">
+                <span class="material-symbols-outlined text-[18px]">person</span> Mi perfil
+              </span>
+              <a class="menu-item text-error mt-1 border-t border-surface-container" href="${ctx}/login?accion=salir">
+                <span class="material-symbols-outlined text-[18px]">logout</span> Cerrar sesión
+              </a>
+            </div>
+          </details>
+        </nav>
+      </c:when>
+      <c:otherwise>
+        <nav class="flex items-center gap-2" aria-label="Cuenta">
+          <a class="boton-borde hidden sm:inline-flex" href="${ctx}/login?tab=registro">Registrarse</a>
+          <a class="boton-primario" href="${ctx}/login">
+            <span class="material-symbols-outlined text-[18px]">login</span>
+            <span>Iniciar sesión</span>
+          </a>
+        </nav>
+      </c:otherwise>
+    </c:choose>
+  </div>
+</header>

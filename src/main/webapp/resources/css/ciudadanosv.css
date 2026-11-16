@@ -1,0 +1,62 @@
+/* Estilos compartidos de CiudadanoSV */
+:root { color-scheme: light; }
+html, body { margin: 0; padding: 0; min-height: 100%; }
+body { background: #f8f9ff; color: #121c2a; font-family: "Public Sans", sans-serif; }
+
+.material-symbols-outlined {
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+  line-height: 1;
+}
+.icono-relleno { font-variation-settings: 'FILL' 1; }
+
+/* Encabezado */
+.sitio-header { position: sticky; top: 0; z-index: 40; background: #fff; border-bottom: 1px solid #e6eeff; }
+.boton-borde {
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  min-height: 40px; padding: 8px 14px; border: 1px solid #d9e3f6; border-radius: 8px;
+  color: #002869; background: #fff; font-size: 14px; font-weight: 600; text-decoration: none; white-space: nowrap;
+}
+.boton-borde:hover { background: #eff4ff; }
+.boton-borde:focus-visible, .boton-primario:focus-visible, .tarjeta-tramite:focus-visible {
+  outline: 2px solid #345baf; outline-offset: 2px;
+}
+.boton-primario {
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  min-height: 40px; padding: 8px 16px; border-radius: 8px;
+  background: #002869; color: #fff; font-size: 14px; font-weight: 700; text-decoration: none; white-space: nowrap;
+  transition: background-color .15s ease;
+}
+.boton-primario:hover { background: #071F4D; }
+
+/* Tarjetas del catálogo */
+.tarjeta-area { transition: box-shadow .2s ease, transform .2s ease; }
+.tarjeta-area:hover { box-shadow: 0 12px 24px rgba(0, 40, 105, 0.08); transform: translateY(-2px); }
+.tarjeta-tramite { transition: background-color .15s ease; }
+.tarjeta-tramite:hover { background: #eff4ff; }
+.tarjeta-tramite:hover .flecha { transform: translateX(2px); color: #002869; }
+.flecha { transition: transform .15s ease; }
+
+/* Campos de formulario */
+.campo {
+  width: 100%; min-height: 44px; padding: 10px 12px; border: 1px solid #d9e3f6; border-radius: 8px;
+  background: #fff; color: #121c2a; font-size: 15px;
+}
+.campo:focus { outline: 2px solid #345baf; outline-offset: 1px; border-color: transparent; }
+/* Selector de fecha invisible sobre el icono del calendario: toda su área abre el calendario */
+.selector-fecha::-webkit-calendar-picker-indicator { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; cursor: pointer; }
+
+/* Tarjetas de opción (radio) */
+.opcion-radio:has(input:checked) { border-color: #002869; background: #eff4ff; }
+
+/* Menú de la cuenta */
+.menu-cuenta > summary::-webkit-details-marker { display: none; }
+.menu-item {
+  display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-radius: 8px;
+  font-size: 14px; font-weight: 600; color: #121c2a; text-decoration: none;
+}
+a.menu-item:hover { background: #eff4ff; }
+.menu-item.text-error { color: #ba1a1a; }
+
+@media (max-width: 480px) {
+  .boton-borde, .boton-primario { min-height: 38px; padding: 7px 10px; font-size: 13px; }
+}

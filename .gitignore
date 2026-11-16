@@ -1,0 +1,16 @@
+# Compilación
+target/
+
+# NetBeans (configuración personal)
+nbactions.xml
+nbproject/private/
+
+# Credenciales locales de la base de datos (cada quien crea la suya desde db.properties.example)
+src/main/resources/db.properties
+
+# Archivos subidos por los usuarios (si algún día se configuran dentro del proyecto)
+CiudadanoSV-archivos/
+
+# Sistema
+Thumbs.db
+.DS_Store

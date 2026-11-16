@@ -1,0 +1,10 @@
+<%-- Etiqueta de color según el estado. Antes de incluir: <c:set var="est" value="${...estado}"/> y <c:set var="estTexto" value="..."/> --%>
+<c:choose>
+  <c:when test="${est == 'RECIBIDA'}"><c:set var="estClase" value="bg-primary-fixed text-primary"/></c:when>
+  <c:when test="${est == 'EN_REVISION'}"><c:set var="estClase" value="bg-dorado/15 text-dorado"/></c:when>
+  <c:when test="${est == 'CITA_PROGRAMADA'}"><c:set var="estClase" value="bg-tertiary-fixed-dim/20 text-[#00606F]"/></c:when>
+  <c:when test="${est == 'APROBADA' or est == 'FINALIZADA'}"><c:set var="estClase" value="bg-[#EAF5EE] text-exito"/></c:when>
+  <c:when test="${est == 'RECHAZADA'}"><c:set var="estClase" value="bg-error-container text-[#93000a]"/></c:when>
+  <c:otherwise><c:set var="estClase" value="bg-surface-container text-on-surface-variant"/></c:otherwise>
+</c:choose>
+<span class="text-caption font-bold uppercase rounded-full px-2 py-0.5 whitespace-nowrap ${estClase}">${estTexto}</span>

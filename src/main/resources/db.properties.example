@@ -1,0 +1,5 @@
+# Copia este archivo como "db.properties" (en esta misma carpeta) y pon tus datos.
+# db.properties NO se sube a GitHub (está en .gitignore).
+db.url=jdbc:mariadb://localhost:3306/ciudadanosv_bd
+db.usuario=root
+db.clave=TU_CLAVE_DE_MARIADB
