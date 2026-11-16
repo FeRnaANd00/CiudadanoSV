@@ -120,7 +120,8 @@
           <c:choose>
             <c:when test="${tramite.disponible and not empty urlFormulario}">
               <a href="${urlFormulario}" class="boton-primario">
-                <span class="material-symbols-outlined text-[18px]">edit_document</span> Iniciar solicitud
+                <span class="material-symbols-outlined text-[18px]">${empty iconoBoton ? 'edit_document' : iconoBoton}</span>
+                ${empty textoBoton ? 'Iniciar solicitud' : textoBoton}
               </a>
             </c:when>
             <c:when test="${tramite.disponible}">

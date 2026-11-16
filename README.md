@@ -22,6 +22,16 @@ database/ciudadanosv_bd.sql       Script de la base de datos con datos de prueba
 3. **NetBeans:** abre el proyecto, elige Tomcat 11 como servidor y pulsa **Run**.
 4. Entra a `http://localhost:8080/CiudadanoSV/`.
 
+## Avance del proyecto
+| Fase | Pasos | Estado |
+|---|---|---|
+| 1. Base y seguridad | 0. Landing, login, registro · 1. Filtro /app y /admin, roles, errores | ✅ |
+| 2. Trámites del ciudadano | 2. Partida de nacimiento · 3. Mis solicitudes + detalle · 4. Municipales · 5. DUI con archivos | ✅ |
+| 3. Citas y consultas | 6. Citas de salud con cupos · 7. Multas VMT | ✅ |
+| 4. Cuenta del ciudadano | 8. Notificaciones y bitácora · 9. Perfil (datos, contraseña, sesiones) | ⏳ Siguiente |
+| 5. Administración | 10. Bandeja y resolución · 11. Cupos · 12. Catálogo · 13. Usuarios · 14. Estadísticas | ⏳ |
+| 6. Cierre | 15. Revisión final, script de BD actualizado | ⏳ |
+
 ## Usuarios de prueba
 | Rol | Usuario | Contraseña |
 |---|---|---|

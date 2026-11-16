@@ -76,6 +76,18 @@
         <servlet-name>DocumentoController</servlet-name>
         <servlet-class>com.mycompany.ciudadanosv.controllers.DocumentoController</servlet-class>
     </servlet>
+    <servlet>
+        <servlet-name>CitaNuevaController</servlet-name>
+        <servlet-class>com.mycompany.ciudadanosv.controllers.CitaNuevaController</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>MisCitasController</servlet-name>
+        <servlet-class>com.mycompany.ciudadanosv.controllers.MisCitasController</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>MultasController</servlet-name>
+        <servlet-class>com.mycompany.ciudadanosv.controllers.MultasController</servlet-class>
+    </servlet>
 
     <!-- ===== Controladores de administración (/admin) ===== -->
     <servlet>
@@ -122,6 +134,18 @@
     <servlet-mapping>
         <servlet-name>DocumentoController</servlet-name>
         <url-pattern>/app/documento</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>CitaNuevaController</servlet-name>
+        <url-pattern>/app/citas/nueva</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>MisCitasController</servlet-name>
+        <url-pattern>/app/citas</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>MultasController</servlet-name>
+        <url-pattern>/app/multas</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
         <servlet-name>AdminInicioController</servlet-name>

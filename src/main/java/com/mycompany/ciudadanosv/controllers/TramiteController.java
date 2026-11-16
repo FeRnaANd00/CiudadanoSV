@@ -18,12 +18,18 @@ import java.sql.SQLException;
 public class TramiteController extends HttpServlet {
 
     /** Código del trámite -> formulario ya construido. Se agrega uno por cada paso nuevo. */
-    private static final java.util.Map<String, String> FORMULARIOS = java.util.Map.of(
-            SolicitudPartidaController.CODIGO_TRAMITE, "/app/solicitud/partida",
-            "MUNI-01", "/app/solicitud/municipal?codigo=MUNI-01",
-            "MUNI-02", "/app/solicitud/municipal?codigo=MUNI-02",
-            "RNPN-DUI-01", "/app/solicitud/dui?codigo=RNPN-DUI-01",
-            "RNPN-DUI-02", "/app/solicitud/dui?codigo=RNPN-DUI-02"
+    private static final java.util.Map<String, String> FORMULARIOS = java.util.Map.ofEntries(
+            java.util.Map.entry(SolicitudPartidaController.CODIGO_TRAMITE, "/app/solicitud/partida"),
+            java.util.Map.entry("MUNI-01", "/app/solicitud/municipal?codigo=MUNI-01"),
+            java.util.Map.entry("MUNI-02", "/app/solicitud/municipal?codigo=MUNI-02"),
+            java.util.Map.entry("RNPN-DUI-01", "/app/solicitud/dui?codigo=RNPN-DUI-01"),
+            java.util.Map.entry("RNPN-DUI-02", "/app/solicitud/dui?codigo=RNPN-DUI-02"),
+            java.util.Map.entry("MINSAL-01", "/app/citas/nueva?codigo=MINSAL-01"),
+            java.util.Map.entry("MINSAL-02", "/app/citas/nueva?codigo=MINSAL-02"),
+            java.util.Map.entry("MINSAL-03", "/app/citas/nueva?codigo=MINSAL-03"),
+            java.util.Map.entry("MINSAL-04", "/app/citas/nueva?codigo=MINSAL-04"),
+            java.util.Map.entry("VMT-01", "/app/multas?tipo=dui"),
+            java.util.Map.entry("VMT-02", "/app/multas?tipo=placa")
     );
 
     @Override
@@ -45,6 +51,13 @@ public class TramiteController extends HttpServlet {
             String formulario = FORMULARIOS.get(tramite.getCodigo());
             if (formulario != null) {
                 request.setAttribute("urlFormulario", request.getContextPath() + formulario);
+                if (formulario.startsWith("/app/citas")) {
+                    request.setAttribute("textoBoton", "Agendar cita");
+                    request.setAttribute("iconoBoton", "event_available");
+                } else if (formulario.startsWith("/app/multas")) {
+                    request.setAttribute("textoBoton", "Consultar multas");
+                    request.setAttribute("iconoBoton", "search");
+                }
             }
         } catch (SQLException ex) {
             log("No se pudo cargar el trámite " + codigo, ex);
