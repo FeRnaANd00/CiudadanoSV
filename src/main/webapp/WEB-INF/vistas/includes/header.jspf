@@ -25,6 +25,15 @@
             </a>
           </c:if>
 
+          <%-- Campanita con el número de avisos sin leer (lo calcula ContadorNotificacionesFilter) --%>
+          <a class="boton-borde relative !px-2.5" href="${ctx}/app/notificaciones"
+             aria-label="Notificaciones${notifNoLeidas > 0 ? (': ' += notifNoLeidas += ' sin leer') : ''}" title="Notificaciones">
+            <span class="material-symbols-outlined text-[20px] ${notifNoLeidas > 0 ? 'icono-relleno' : ''}">notifications</span>
+            <c:if test="${notifNoLeidas > 0}">
+              <span class="absolute -top-1.5 -right-1.5 min-w-5 h-5 px-1 rounded-full bg-error text-white text-[11px] font-bold leading-5 text-center">${notifNoLeidas > 9 ? '9+' : notifNoLeidas}</span>
+            </c:if>
+          </a>
+
           <%-- Menú de la cuenta (desplegable sin JavaScript) --%>
           <details class="menu-cuenta relative">
             <summary class="boton-borde cursor-pointer list-none" aria-label="Menú de la cuenta">
@@ -51,12 +60,18 @@
               <a class="menu-item" href="${ctx}/app/citas">
                 <span class="material-symbols-outlined text-[18px]">calendar_month</span> Mis citas
               </a>
-              <span class="menu-item opacity-50 cursor-not-allowed" title="Disponible en el paso 8">
+              <a class="menu-item" href="${ctx}/app/notificaciones">
                 <span class="material-symbols-outlined text-[18px]">notifications</span> Notificaciones
-              </span>
-              <span class="menu-item opacity-50 cursor-not-allowed" title="Disponible en el paso 9">
+                <c:if test="${notifNoLeidas > 0}">
+                  <span class="ml-auto rounded-full bg-error text-white text-[11px] font-bold px-1.5">${notifNoLeidas}</span>
+                </c:if>
+              </a>
+              <a class="menu-item" href="${ctx}/app/notificaciones?vista=historial">
+                <span class="material-symbols-outlined text-[18px]">history</span> Mi actividad
+              </a>
+              <a class="menu-item" href="${ctx}/app/perfil">
                 <span class="material-symbols-outlined text-[18px]">person</span> Mi perfil
-              </span>
+              </a>
               <a class="menu-item text-error mt-1 border-t border-surface-container" href="${ctx}/login?accion=salir">
                 <span class="material-symbols-outlined text-[18px]">logout</span> Cerrar sesión
               </a>

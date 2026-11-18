@@ -1,6 +1,8 @@
 package com.mycompany.ciudadanosv.filters;
 
 import com.mycompany.ciudadanosv.models.Usuario;
+import com.mycompany.ciudadanosv.models.UsuarioDAO;
+import java.sql.SQLException;
 import jakarta.servlet.Filter;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -41,6 +43,17 @@ public class AutenticacionFilter implements Filter {
             response.sendRedirect(request.getContextPath() + "/login?destino="
                     + URLEncoder.encode(destino, StandardCharsets.UTF_8));
             return;
+        }
+
+        // Si el administrador la suspendió o le cambió rol/institución, se aplica de inmediato
+        try {
+            if (!new UsuarioDAO().refrescar(usuario)) {
+                sesion.invalidate();
+                response.sendRedirect(request.getContextPath() + "/login?suspendida=1");
+                return;
+            }
+        } catch (SQLException ex) {
+            request.getServletContext().log("No se pudo verificar la cuenta en sesión", ex);
         }
 
         if (ruta.startsWith("/admin") && !usuario.isFuncionario()) {

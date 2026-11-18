@@ -26,16 +26,20 @@ public final class Csrf {
         }
     }
 
-    /** true si el POST trae el mismo token que la sesión. */
+    /**
+     * true si el POST trae el mismo token que la sesión.
+     * Si no, marca la petición con "errorCsrf" para que la página de error explique que el formulario venció.
+     */
     public static boolean esValido(HttpServletRequest request) {
         HttpSession sesion = request.getSession(false);
-        if (sesion == null) {
-            return false;
-        }
-        Object esperado = sesion.getAttribute(ATRIBUTO);
+        Object esperado = sesion == null ? null : sesion.getAttribute(ATRIBUTO);
         String recibido = request.getParameter(ATRIBUTO);
-        return esperado != null && recibido != null
+        boolean valido = esperado != null && recibido != null
                 && MessageDigest.isEqual(esperado.toString().getBytes(StandardCharsets.UTF_8),
                         recibido.getBytes(StandardCharsets.UTF_8));
+        if (!valido) {
+            request.setAttribute("errorCsrf", Boolean.TRUE);
+        }
+        return valido;
     }
 }

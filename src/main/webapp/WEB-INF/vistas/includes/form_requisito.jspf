@@ -1,0 +1,37 @@
+<%-- Formulario de un requisito. Antes de incluir: <c:set var="req" value="${requisito o null para uno nuevo}"/> --%>
+<form method="post" action="${ctx}/admin/tramite" class="grid gap-3 sm:grid-cols-2">
+  <input type="hidden" name="csrf" value="${sessionScope.csrf}">
+  <input type="hidden" name="accion" value="requisito">
+  <input type="hidden" name="id" value="${tramite.idTramite}">
+  <input type="hidden" name="idRequisito" value="${empty req ? 0 : req.idRequisito}">
+  <label class="block sm:col-span-2">
+    <span class="text-label-sm text-on-surface-variant">Nombre del requisito</span>
+    <input class="campo mt-1" name="nombre" required minlength="3" maxlength="150" value="<c:out value='${req.nombre}'/>" placeholder="Comprobante de domicilio reciente">
+  </label>
+  <label class="block sm:col-span-2">
+    <span class="text-label-sm text-on-surface-variant">Descripción para el ciudadano</span>
+    <input class="campo mt-1" name="descripcion" maxlength="250" value="<c:out value='${req.descripcion}'/>">
+  </label>
+  <label class="block">
+    <span class="text-label-sm text-on-surface-variant">Validación</span>
+    <select class="campo mt-1" name="tipoValidacion">
+      <option value="MANUAL" ${req.tipoValidacion == 'MANUAL' ? 'selected' : ''}>Manual (cotejo del revisor)</option>
+      <option value="AUTOMATICA" ${req.tipoValidacion == 'AUTOMATICA' ? 'selected' : ''}>Automática</option>
+      <option value="PRESENCIAL" ${req.tipoValidacion == 'PRESENCIAL' ? 'selected' : ''}>Presencial (en ventanilla)</option>
+    </select>
+  </label>
+  <label class="block">
+    <span class="text-label-sm text-on-surface-variant">Tamaño máximo del archivo (MB)</span>
+    <input class="campo mt-1" type="number" name="tamanoMaxMb" min="1" max="5" value="${empty req ? 5 : req.tamanoMaxMb}">
+  </label>
+  <div class="sm:col-span-2 flex flex-wrap gap-x-5 gap-y-2">
+    <label class="flex items-center gap-2"><input type="checkbox" name="obligatorio" ${empty req or req.obligatorio ? 'checked' : ''} class="w-4 h-4 accent-[#002869]"> <span class="text-label-md">Obligatorio</span></label>
+    <label class="flex items-center gap-2"><input type="checkbox" name="requiereArchivo" ${req.requiereArchivo ? 'checked' : ''} class="w-4 h-4 accent-[#002869]"> <span class="text-label-md">El ciudadano sube un archivo</span></label>
+    <c:forTokens var="fmt" delims="," items="PDF,JPG,PNG">
+      <label class="flex items-center gap-1"><input type="checkbox" name="formatos" value="${fmt}" ${empty req or empty req.formatos or fn:contains(req.formatos, fmt) ? 'checked' : ''} class="w-4 h-4 accent-[#002869]"> <span class="text-label-sm">${fmt}</span></label>
+    </c:forTokens>
+  </div>
+  <div class="sm:col-span-2">
+    <button class="boton-primario"><span class="material-symbols-outlined text-[18px]">save</span> ${empty req ? 'Agregar requisito' : 'Guardar requisito'}</button>
+  </div>
+</form>

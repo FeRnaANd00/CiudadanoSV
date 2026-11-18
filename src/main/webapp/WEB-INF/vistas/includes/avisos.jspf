@@ -1,0 +1,21 @@
+<%-- Mensajes de una sola vez (aviso / avisoError en sesión) y error de base de datos (errorBD) --%>
+<c:if test="${not empty sessionScope.aviso}">
+  <div class="flex items-start gap-3 rounded-xl bg-[#EAF5EE] text-exito p-4" role="status">
+    <span class="material-symbols-outlined icono-relleno">check_circle</span>
+    <p class="text-label-md"><c:out value="${sessionScope.aviso}"/></p>
+  </div>
+  <c:remove var="aviso" scope="session"/>
+</c:if>
+<c:if test="${not empty sessionScope.avisoError}">
+  <div class="flex items-start gap-3 rounded-xl bg-error-container text-[#93000a] p-4" role="alert">
+    <span class="material-symbols-outlined">error</span>
+    <p class="text-label-md"><c:out value="${sessionScope.avisoError}"/></p>
+  </div>
+  <c:remove var="avisoError" scope="session"/>
+</c:if>
+<c:if test="${not empty errorBD}">
+  <div class="flex items-start gap-3 rounded-xl bg-error-container text-[#93000a] p-4" role="alert">
+    <span class="material-symbols-outlined">database</span>
+    <p class="text-label-md"><c:out value="${errorBD}"/></p>
+  </div>
+</c:if>

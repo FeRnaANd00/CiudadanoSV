@@ -14,6 +14,9 @@ public class Usuario {
     private String correo;
     private String telefono;
     private String estado;
+    // Solo funcionarios: institución a la que pertenece (null = todas, para el super admin)
+    private Integer idInstitucion;
+    private String institucionSiglas;
 
     public Usuario() {
     }
@@ -33,6 +36,20 @@ public class Usuario {
     /** Revisor, operador o super admin: puede entrar a /admin. */
     public boolean isFuncionario() {
         return "REVISOR".equals(rol) || "OPERADOR".equals(rol) || "SUPER_ADMIN".equals(rol);
+    }
+
+    public boolean isSuperAdmin() {
+        return "SUPER_ADMIN".equals(rol);
+    }
+
+    /** Puede cambiar el estado de solicitudes y cotejar documentos (SOLICITUD_RESOLVER). */
+    public boolean isPuedeResolver() {
+        return "REVISOR".equals(rol) || "SUPER_ADMIN".equals(rol);
+    }
+
+    /** Puede administrar cupos y la agenda (CUPO_GESTIONAR). */
+    public boolean isPuedeGestionarCupos() {
+        return "OPERADOR".equals(rol) || "SUPER_ADMIN".equals(rol);
     }
 
     /** Nombre del rol para mostrar en pantalla. */
@@ -72,4 +89,10 @@ public class Usuario {
 
     public String getEstado() { return estado; }
     public void setEstado(String estado) { this.estado = estado; }
+
+    public Integer getIdInstitucion() { return idInstitucion; }
+    public void setIdInstitucion(Integer idInstitucion) { this.idInstitucion = idInstitucion; }
+
+    public String getInstitucionSiglas() { return institucionSiglas; }
+    public void setInstitucionSiglas(String institucionSiglas) { this.institucionSiglas = institucionSiglas; }
 }

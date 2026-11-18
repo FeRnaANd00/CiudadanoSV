@@ -94,113 +94,7 @@ public class CitaDAO {
         try (Connection con = Conexion.conectar()) {
             con.setAutoCommit(false);
             try {
-                Cupo cupo;
-                String nombreTramite;
-                String nombreSede;
-                try (PreparedStatement ps = con.prepareStatement(
-                        "SELECT c.id_cupo, c.id_sede, c.id_tramite, c.fecha, c.hora_inicio, c.hora_fin, c.capacidad, "
-                        + "       c.ocupados, c.habilitado, t.nombre AS tramite, s.nombre AS sede "
-                        + "FROM cupo c JOIN tramite t ON t.id_tramite = c.id_tramite "
-                        + "JOIN sede s ON s.id_sede = c.id_sede "
-                        + "WHERE c.id_cupo = ? FOR UPDATE")) {
-                    ps.setInt(1, idCupo);
-                    try (ResultSet rs = ps.executeQuery()) {
-                        if (!rs.next()) {
-                            throw new ReglaNegocioException("El horario seleccionado no existe.");
-                        }
-                        cupo = mapearCupo(rs);
-                        nombreTramite = rs.getString("tramite");
-                        nombreSede = rs.getString("sede");
-                    }
-                }
-                if (!cupo.isHabilitado()) {
-                    throw new ReglaNegocioException("Ese horario no está habilitado.");
-                }
-                if (!cupo.getFecha().isAfter(LocalDate.now())) {
-                    throw new ReglaNegocioException("Solo puedes agendar a partir de mañana.");
-                }
-                if (cupo.isLleno()) {
-                    throw new ReglaNegocioException("Ese horario se acaba de llenar. Elige otro.");
-                }
-
-                // Una sola cita activa por tipo de atención
-                try (PreparedStatement ps = con.prepareStatement(
-                        "SELECT ci.codigo FROM cita ci JOIN cupo cu ON cu.id_cupo = ci.id_cupo "
-                        + "WHERE ci.id_usuario = ? AND cu.id_tramite = ? AND ci.estado = 'PROGRAMADA' AND ci.fecha_hora > NOW() LIMIT 1")) {
-                    ps.setInt(1, idUsuario);
-                    ps.setInt(2, cupo.getIdTramite());
-                    try (ResultSet rs = ps.executeQuery()) {
-                        if (rs.next()) {
-                            throw new ReglaNegocioException("Ya tienes una cita programada para este servicio ("
-                                    + rs.getString(1) + "). Cancélala si quieres cambiar la fecha.");
-                        }
-                    }
-                }
-                // No dos citas en el mismo bloque horario
-                try (PreparedStatement ps = con.prepareStatement(
-                        "SELECT 1 FROM cita ci JOIN cupo cu ON cu.id_cupo = ci.id_cupo "
-                        + "WHERE ci.id_usuario = ? AND ci.estado = 'PROGRAMADA' AND cu.fecha = ? "
-                        + "AND cu.hora_inicio < ? AND cu.hora_fin > ? LIMIT 1")) {
-                    ps.setInt(1, idUsuario);
-                    ps.setDate(2, Date.valueOf(cupo.getFecha()));
-                    ps.setTime(3, Time.valueOf(cupo.getHoraFin()));
-                    ps.setTime(4, Time.valueOf(cupo.getHoraInicio()));
-                    try (ResultSet rs = ps.executeQuery()) {
-                        if (rs.next()) {
-                            throw new ReglaNegocioException("Ya tienes otra cita en ese mismo horario.");
-                        }
-                    }
-                }
-
-                // Turno y hora estimada: el bloque se reparte entre su capacidad
-                int turno = cupo.getOcupados() + 1;
-                long minutosBloque = Duration.between(cupo.getHoraInicio(), cupo.getHoraFin()).toMinutes();
-                long minutosPorTurno = Math.max(1, minutosBloque / Math.max(1, cupo.getCapacidad()));
-                LocalDateTime fechaHora = LocalDateTime.of(cupo.getFecha(), cupo.getHoraInicio())
-                        .plusMinutes((turno - 1) * minutosPorTurno);
-
-                int idCita;
-                try (PreparedStatement ps = con.prepareStatement(
-                        "INSERT INTO cita (codigo, id_usuario, id_cupo, fecha_hora, numero_turno, estado) "
-                        + "VALUES (?, ?, ?, ?, ?, 'PROGRAMADA')", Statement.RETURN_GENERATED_KEYS)) {
-                    ps.setString(1, "TMP-" + UUID.randomUUID().toString().replace("-", "").substring(0, 16));
-                    ps.setInt(2, idUsuario);
-                    ps.setInt(3, idCupo);
-                    ps.setTimestamp(4, Timestamp.valueOf(fechaHora));
-                    ps.setInt(5, turno);
-                    ps.executeUpdate();
-                    try (ResultSet keys = ps.getGeneratedKeys()) {
-                        keys.next();
-                        idCita = keys.getInt(1);
-                    }
-                }
-                String codigo = String.format("CIT-%d-%05d", Year.now().getValue(), idCita);
-                try (PreparedStatement ps = con.prepareStatement("UPDATE cita SET codigo = ? WHERE id_cita = ?")) {
-                    ps.setString(1, codigo);
-                    ps.setInt(2, idCita);
-                    ps.executeUpdate();
-                }
-                try (PreparedStatement ps = con.prepareStatement(
-                        "UPDATE cupo SET ocupados = ocupados + 1 WHERE id_cupo = ? AND ocupados < capacidad")) {
-                    ps.setInt(1, idCupo);
-                    if (ps.executeUpdate() == 0) {
-                        throw new ReglaNegocioException("Ese horario se acaba de llenar. Elige otro.");
-                    }
-                }
-
-                Cita cita = new Cita();
-                cita.setIdCita(idCita);
-                cita.setCodigo(codigo);
-                cita.setFechaHora(fechaHora);
-                cita.setNumeroTurno(turno);
-                cita.setTramiteNombre(nombreTramite);
-                cita.setSedeNombre(nombreSede);
-                cita.setEstado("PROGRAMADA");
-
-                notificarYRegistrar(con, idUsuario, idCita, "Cita agendada: " + nombreTramite,
-                        "Tu cita " + codigo + " es el " + cita.getFechaTexto() + " a las " + cita.getHoraTexto()
-                        + " en " + nombreSede + ". Turno #" + turno + ".",
-                        "AGENDAR_CITA", "Cita " + codigo + " agendada (" + nombreTramite + ")", ip);
+                Cita cita = reservarEn(con, idUsuario, idCupo, null, ip);
                 con.commit();
                 return cita;
             } catch (SQLException | ReglaNegocioException ex) {
@@ -208,6 +102,128 @@ public class CitaDAO {
                 throw ex;
             }
         }
+    }
+
+    /**
+     * Reserva usando la conexión (y la transacción) de quien llama; no hace commit.
+     * La usa también la administración para la cita biométrica de un trámite (idSolicitud).
+     */
+    Cita reservarEn(Connection con, int idUsuario, int idCupo, Integer idSolicitud, String ip)
+            throws SQLException, ReglaNegocioException {
+        Cupo cupo;
+        String nombreTramite;
+        String nombreSede;
+        try (PreparedStatement ps = con.prepareStatement(
+                "SELECT c.id_cupo, c.id_sede, c.id_tramite, c.fecha, c.hora_inicio, c.hora_fin, c.capacidad, "
+                + "       c.ocupados, c.habilitado, t.nombre AS tramite, s.nombre AS sede "
+                + "FROM cupo c JOIN tramite t ON t.id_tramite = c.id_tramite "
+                + "JOIN sede s ON s.id_sede = c.id_sede "
+                + "WHERE c.id_cupo = ? FOR UPDATE")) {
+            ps.setInt(1, idCupo);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (!rs.next()) {
+                    throw new ReglaNegocioException("El horario seleccionado no existe.");
+                }
+                cupo = mapearCupo(rs);
+                nombreTramite = rs.getString("tramite");
+                nombreSede = rs.getString("sede");
+            }
+        }
+        if (!cupo.isHabilitado()) {
+            throw new ReglaNegocioException("Ese horario no está habilitado.");
+        }
+        if (!cupo.getFecha().isAfter(LocalDate.now())) {
+            throw new ReglaNegocioException("Solo puedes agendar a partir de mañana.");
+        }
+        if (cupo.isLleno()) {
+            throw new ReglaNegocioException("Ese horario se acaba de llenar. Elige otro.");
+        }
+
+        // Una sola cita activa por tipo de atención
+        try (PreparedStatement ps = con.prepareStatement(
+                "SELECT ci.codigo FROM cita ci JOIN cupo cu ON cu.id_cupo = ci.id_cupo "
+                + "WHERE ci.id_usuario = ? AND cu.id_tramite = ? AND ci.estado = 'PROGRAMADA' AND ci.fecha_hora > NOW() LIMIT 1")) {
+            ps.setInt(1, idUsuario);
+            ps.setInt(2, cupo.getIdTramite());
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    throw new ReglaNegocioException("Ya tienes una cita programada para este servicio ("
+                            + rs.getString(1) + "). Cancélala si quieres cambiar la fecha.");
+                }
+            }
+        }
+        // No dos citas en el mismo bloque horario
+        try (PreparedStatement ps = con.prepareStatement(
+                "SELECT 1 FROM cita ci JOIN cupo cu ON cu.id_cupo = ci.id_cupo "
+                + "WHERE ci.id_usuario = ? AND ci.estado = 'PROGRAMADA' AND cu.fecha = ? "
+                + "AND cu.hora_inicio < ? AND cu.hora_fin > ? LIMIT 1")) {
+            ps.setInt(1, idUsuario);
+            ps.setDate(2, Date.valueOf(cupo.getFecha()));
+            ps.setTime(3, Time.valueOf(cupo.getHoraFin()));
+            ps.setTime(4, Time.valueOf(cupo.getHoraInicio()));
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    throw new ReglaNegocioException("Ya tienes otra cita en ese mismo horario.");
+                }
+            }
+        }
+
+        // Turno y hora estimada: el bloque se reparte entre su capacidad
+        int turno = cupo.getOcupados() + 1;
+        long minutosBloque = Duration.between(cupo.getHoraInicio(), cupo.getHoraFin()).toMinutes();
+        long minutosPorTurno = Math.max(1, minutosBloque / Math.max(1, cupo.getCapacidad()));
+        LocalDateTime fechaHora = LocalDateTime.of(cupo.getFecha(), cupo.getHoraInicio())
+                .plusMinutes((turno - 1) * minutosPorTurno);
+
+        int idCita;
+        try (PreparedStatement ps = con.prepareStatement(
+                "INSERT INTO cita (codigo, id_usuario, id_cupo, fecha_hora, numero_turno, estado, id_solicitud) "
+                + "VALUES (?, ?, ?, ?, ?, 'PROGRAMADA', ?)", Statement.RETURN_GENERATED_KEYS)) {
+            ps.setString(1, "TMP-" + UUID.randomUUID().toString().replace("-", "").substring(0, 16));
+            ps.setInt(2, idUsuario);
+            ps.setInt(3, idCupo);
+            ps.setTimestamp(4, Timestamp.valueOf(fechaHora));
+            ps.setInt(5, turno);
+            if (idSolicitud == null) {
+                ps.setNull(6, java.sql.Types.INTEGER);
+            } else {
+                ps.setInt(6, idSolicitud);
+            }
+            ps.executeUpdate();
+            try (ResultSet keys = ps.getGeneratedKeys()) {
+                keys.next();
+                idCita = keys.getInt(1);
+            }
+        }
+        String codigo = String.format("CIT-%d-%05d", Year.now().getValue(), idCita);
+        try (PreparedStatement ps = con.prepareStatement("UPDATE cita SET codigo = ? WHERE id_cita = ?")) {
+            ps.setString(1, codigo);
+            ps.setInt(2, idCita);
+            ps.executeUpdate();
+        }
+        try (PreparedStatement ps = con.prepareStatement(
+                "UPDATE cupo SET ocupados = ocupados + 1 WHERE id_cupo = ? AND ocupados < capacidad")) {
+            ps.setInt(1, idCupo);
+            if (ps.executeUpdate() == 0) {
+                throw new ReglaNegocioException("Ese horario se acaba de llenar. Elige otro.");
+            }
+        }
+
+        Cita cita = new Cita();
+        cita.setIdCita(idCita);
+        cita.setCodigo(codigo);
+        cita.setFechaHora(fechaHora);
+        cita.setNumeroTurno(turno);
+        cita.setTramiteNombre(nombreTramite);
+        cita.setSedeNombre(nombreSede);
+        cita.setEstado("PROGRAMADA");
+
+        notificarYRegistrar(con, idUsuario, idCita, "Cita agendada: " + nombreTramite,
+                "Tu cita " + codigo + " es el " + cita.getFechaTexto() + " a las " + cita.getHoraTexto()
+                + " en " + nombreSede + ". Turno #" + turno + ".",
+                "AGENDAR_CITA", "Cita " + codigo + " agendada (" + nombreTramite + ")"
+                + (idSolicitud != null ? " por la institución" : ""), ip);
+        return cita;
     }
 
     /** Cancela una cita propia (hasta 2 horas antes) y libera el turno. */
@@ -306,22 +322,8 @@ public class CitaDAO {
     // ------------------------------------------------------------------
     private void notificarYRegistrar(Connection con, int idUsuario, int idCita, String titulo, String mensaje,
             String accion, String descripcion, String ip) throws SQLException {
-        try (PreparedStatement ps = con.prepareStatement(
-                "INSERT INTO notificacion (id_usuario, tipo, titulo, mensaje, id_cita) VALUES (?, 'CITA', ?, ?, ?)")) {
-            ps.setInt(1, idUsuario);
-            ps.setString(2, titulo);
-            ps.setString(3, mensaje);
-            ps.setInt(4, idCita);
-            ps.executeUpdate();
-        }
-        try (PreparedStatement ps = con.prepareStatement(
-                "INSERT INTO bitacora (id_usuario, accion, descripcion, ip) VALUES (?, ?, ?, ?)")) {
-            ps.setInt(1, idUsuario);
-            ps.setString(2, accion);
-            ps.setString(3, descripcion);
-            ps.setString(4, ip);
-            ps.executeUpdate();
-        }
+        NotificacionDAO.crear(con, idUsuario, "CITA", titulo, mensaje, null, idCita);
+        NotificacionDAO.registrarBitacora(con, idUsuario, accion, descripcion, ip);
     }
 
     private Cupo mapearCupo(ResultSet rs) throws SQLException {

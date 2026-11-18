@@ -176,8 +176,9 @@ public class SolicitudDAO {
     /** Un documento con su ruta y el dueño de la solicitud (para descargarlo). Null si no existe. */
     public Documento buscarDocumento(int idDocumento) throws SQLException {
         String sql = "SELECT d.id_documento, d.id_solicitud, d.nombre_archivo, d.ruta_archivo, d.tipo_mime, "
-                + "       d.tamano_kb, d.estado_cotejo, s.id_usuario "
+                + "       d.tamano_kb, d.estado_cotejo, s.id_usuario, t.id_institucion "
                 + "FROM documento d JOIN solicitud s ON s.id_solicitud = d.id_solicitud "
+                + "JOIN tramite t ON t.id_tramite = s.id_tramite "
                 + "WHERE d.id_documento = ?";
         try (Connection con = Conexion.conectar();
              PreparedStatement ps = con.prepareStatement(sql)) {
@@ -195,6 +196,7 @@ public class SolicitudDAO {
                 d.setTamanoKb(rs.getInt("tamano_kb"));
                 d.setEstadoCotejo(rs.getString("estado_cotejo"));
                 d.setIdUsuarioDueno(rs.getInt("id_usuario"));
+                d.setIdInstitucion(rs.getInt("id_institucion"));
                 return d;
             }
         }
@@ -398,21 +400,9 @@ public class SolicitudDAO {
             ps.setInt(2, idUsuario);
             ps.executeUpdate();
         }
-        try (PreparedStatement ps = con.prepareStatement(
-                "INSERT INTO notificacion (id_usuario, tipo, titulo, mensaje, id_solicitud) "
-                + "VALUES (?, 'TRAMITE', ?, ?, ?)")) {
-            ps.setInt(1, idUsuario);
-            ps.setString(2, "Solicitud recibida: " + nombreTramite);
-            ps.setString(3, "Tu solicitud " + folio + " fue recibida y está pendiente de revisión.");
-            ps.setInt(4, idSolicitud);
-            ps.executeUpdate();
-        }
-        try (PreparedStatement ps = con.prepareStatement(
-                "INSERT INTO bitacora (id_usuario, accion, descripcion, ip) VALUES (?, 'ENVIO_SOLICITUD', ?, ?)")) {
-            ps.setInt(1, idUsuario);
-            ps.setString(2, "Solicitud " + folio + " (" + nombreTramite + ") enviada");
-            ps.setString(3, ip);
-            ps.executeUpdate();
-        }
+        NotificacionDAO.crear(con, idUsuario, "TRAMITE", "Solicitud recibida: " + nombreTramite,
+                "Tu solicitud " + folio + " fue recibida y está pendiente de revisión.", idSolicitud, null);
+        NotificacionDAO.registrarBitacora(con, idUsuario, "ENVIO_SOLICITUD",
+                "Solicitud " + folio + " (" + nombreTramite + ") enviada", ip);
     }
 }

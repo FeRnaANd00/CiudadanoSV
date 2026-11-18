@@ -12,6 +12,7 @@ public class Documento {
     private String requisitoNombre;
     private String rutaArchivo;      // relativa a la carpeta de archivos
     private int idUsuarioDueno;      // ciudadano dueño de la solicitud
+    private int idInstitucion;       // institución del trámite (control de acceso de funcionarios)
 
     public Documento() {
     }
@@ -64,4 +65,7 @@ public class Documento {
 
     public String getRequisitoNombre() { return requisitoNombre; }
     public void setRequisitoNombre(String requisitoNombre) { this.requisitoNombre = requisitoNombre; }
+
+    public int getIdInstitucion() { return idInstitucion; }
+    public void setIdInstitucion(int idInstitucion) { this.idInstitucion = idInstitucion; }
 }

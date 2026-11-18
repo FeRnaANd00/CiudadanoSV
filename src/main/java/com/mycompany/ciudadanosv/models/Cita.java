@@ -23,6 +23,10 @@ public class Cita {
     private String sedeNombre;
     private String sedeDireccion;
     private String institucionSiglas;
+    // Agenda de la sede (administración)
+    private String ciudadanoNombre;
+    private String ciudadanoDui;
+    private String folioSolicitud;
 
     public Cita() {
     }
@@ -119,4 +123,19 @@ public class Cita {
 
     public String getInstitucionSiglas() { return institucionSiglas; }
     public void setInstitucionSiglas(String institucionSiglas) { this.institucionSiglas = institucionSiglas; }
+
+    /** Programada y ya llegó el día: el operador puede marcar si asistió. */
+    public boolean isAtendible() {
+        return "PROGRAMADA".equals(estado) && fechaHora != null
+                && !fechaHora.toLocalDate().isAfter(LocalDate.now());
+    }
+
+    public String getCiudadanoNombre() { return ciudadanoNombre; }
+    public void setCiudadanoNombre(String ciudadanoNombre) { this.ciudadanoNombre = ciudadanoNombre; }
+
+    public String getCiudadanoDui() { return ciudadanoDui; }
+    public void setCiudadanoDui(String ciudadanoDui) { this.ciudadanoDui = ciudadanoDui; }
+
+    public String getFolioSolicitud() { return folioSolicitud; }
+    public void setFolioSolicitud(String folioSolicitud) { this.folioSolicitud = folioSolicitud; }
 }

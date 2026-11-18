@@ -15,6 +15,26 @@
         <param-value></param-value>
     </context-param>
 
+    <!-- ===== Cabeceras de seguridad en todas las respuestas (filtro incluido en Tomcat) =====
+         X-Frame-Options: DENY (nadie puede meter el portal en un iframe: clickjacking),
+         X-Content-Type-Options: nosniff, X-XSS-Protection. HSTS desactivado porque el portal corre en HTTP local. -->
+    <filter>
+        <filter-name>CabecerasSeguridad</filter-name>
+        <filter-class>org.apache.catalina.filters.HttpHeaderSecurityFilter</filter-class>
+        <init-param>
+            <param-name>hstsEnabled</param-name>
+            <param-value>false</param-value>
+        </init-param>
+        <init-param>
+            <param-name>antiClickJackingOption</param-name>
+            <param-value>DENY</param-value>
+        </init-param>
+    </filter>
+    <filter-mapping>
+        <filter-name>CabecerasSeguridad</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>
+
     <!-- ===== Seguridad: zonas privadas ===== -->
     <!-- /app/*   -> requiere sesión   |   /admin/* -> requiere sesión de funcionario -->
     <filter>
@@ -23,6 +43,18 @@
     </filter>
     <filter-mapping>
         <filter-name>AutenticacionFilter</filter-name>
+        <url-pattern>/app/*</url-pattern>
+        <url-pattern>/admin/*</url-pattern>
+    </filter-mapping>
+
+    <!-- Número de notificaciones sin leer para la campanita del menú -->
+    <filter>
+        <filter-name>ContadorNotificacionesFilter</filter-name>
+        <filter-class>com.mycompany.ciudadanosv.filters.ContadorNotificacionesFilter</filter-class>
+    </filter>
+    <filter-mapping>
+        <filter-name>ContadorNotificacionesFilter</filter-name>
+        <url-pattern>/inicio</url-pattern>
         <url-pattern>/app/*</url-pattern>
         <url-pattern>/admin/*</url-pattern>
     </filter-mapping>
@@ -88,11 +120,47 @@
         <servlet-name>MultasController</servlet-name>
         <servlet-class>com.mycompany.ciudadanosv.controllers.MultasController</servlet-class>
     </servlet>
+    <servlet>
+        <servlet-name>NotificacionesController</servlet-name>
+        <servlet-class>com.mycompany.ciudadanosv.controllers.NotificacionesController</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>PerfilController</servlet-name>
+        <servlet-class>com.mycompany.ciudadanosv.controllers.PerfilController</servlet-class>
+    </servlet>
 
     <!-- ===== Controladores de administración (/admin) ===== -->
     <servlet>
         <servlet-name>AdminInicioController</servlet-name>
         <servlet-class>com.mycompany.ciudadanosv.controllers.AdminInicioController</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>AdminSolicitudesController</servlet-name>
+        <servlet-class>com.mycompany.ciudadanosv.controllers.AdminSolicitudesController</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>AdminSolicitudController</servlet-name>
+        <servlet-class>com.mycompany.ciudadanosv.controllers.AdminSolicitudController</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>AdminCuposController</servlet-name>
+        <servlet-class>com.mycompany.ciudadanosv.controllers.AdminCuposController</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>AdminTramitesController</servlet-name>
+        <servlet-class>com.mycompany.ciudadanosv.controllers.AdminTramitesController</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>AdminTramiteController</servlet-name>
+        <servlet-class>com.mycompany.ciudadanosv.controllers.AdminTramiteController</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>AdminUsuariosController</servlet-name>
+        <servlet-class>com.mycompany.ciudadanosv.controllers.AdminUsuariosController</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>AdminUsuarioController</servlet-name>
+        <servlet-class>com.mycompany.ciudadanosv.controllers.AdminUsuarioController</servlet-class>
     </servlet>
 
     <servlet-mapping>
@@ -148,8 +216,44 @@
         <url-pattern>/app/multas</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
+        <servlet-name>NotificacionesController</servlet-name>
+        <url-pattern>/app/notificaciones</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>PerfilController</servlet-name>
+        <url-pattern>/app/perfil</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
         <servlet-name>AdminInicioController</servlet-name>
         <url-pattern>/admin/inicio</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>AdminSolicitudesController</servlet-name>
+        <url-pattern>/admin/solicitudes</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>AdminSolicitudController</servlet-name>
+        <url-pattern>/admin/solicitud</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>AdminCuposController</servlet-name>
+        <url-pattern>/admin/cupos</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>AdminTramitesController</servlet-name>
+        <url-pattern>/admin/tramites</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>AdminTramiteController</servlet-name>
+        <url-pattern>/admin/tramite</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>AdminUsuariosController</servlet-name>
+        <url-pattern>/admin/usuarios</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>AdminUsuarioController</servlet-name>
+        <url-pattern>/admin/usuario</url-pattern>
     </servlet-mapping>
 
     <!-- ===== Páginas de error ===== -->
@@ -163,6 +267,19 @@
     </error-page>
     <error-page>
         <error-code>500</error-code>
+        <location>/WEB-INF/vistas/error.jsp</location>
+    </error-page>
+    <error-page>
+        <error-code>400</error-code>
+        <location>/WEB-INF/vistas/error.jsp</location>
+    </error-page>
+    <error-page>
+        <error-code>405</error-code>
+        <location>/WEB-INF/vistas/error.jsp</location>
+    </error-page>
+    <!-- Cualquier excepción no controlada: página amable, nunca el detalle técnico -->
+    <error-page>
+        <exception-type>java.lang.Throwable</exception-type>
         <location>/WEB-INF/vistas/error.jsp</location>
     </error-page>
 
@@ -184,5 +301,10 @@
         <session-timeout>
             30
         </session-timeout>
+        <!-- La cookie de sesión no la puede leer JavaScript y el id nunca va en la URL -->
+        <cookie-config>
+            <http-only>true</http-only>
+        </cookie-config>
+        <tracking-mode>COOKIE</tracking-mode>
     </session-config>
 </web-app>

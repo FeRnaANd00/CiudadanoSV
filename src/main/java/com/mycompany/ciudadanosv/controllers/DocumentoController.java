@@ -18,7 +18,8 @@ import java.sql.SQLException;
 /**
  * Muestra / descarga un documento adjunto.
  * URL protegida: /app/documento?id=5
- * Solo lo puede abrir el ciudadano dueño de la solicitud o un funcionario.
+ * Solo lo puede abrir el ciudadano dueño de la solicitud, un funcionario de la institución
+ * del trámite o el super administrador.
  */
 public class DocumentoController extends HttpServlet {
 
@@ -43,7 +44,7 @@ public class DocumentoController extends HttpServlet {
             return;
         }
         // Mismo 404 si no existe o no es suyo: no revelamos qué documentos existen
-        if (doc == null || (doc.getIdUsuarioDueno() != usuario.getIdUsuario() && !usuario.isFuncionario())) {
+        if (doc == null || !puedeVer(usuario, doc)) {
             response.sendError(HttpServletResponse.SC_NOT_FOUND);
             return;
         }
@@ -61,6 +62,14 @@ public class DocumentoController extends HttpServlet {
         response.setHeader("Content-Disposition", "inline; filename*=UTF-8''" + nombre);
         response.setHeader("X-Content-Type-Options", "nosniff");
         Files.copy(archivo, response.getOutputStream());
+    }
+
+    private static boolean puedeVer(Usuario usuario, Documento doc) {
+        if (doc.getIdUsuarioDueno() == usuario.getIdUsuario() || usuario.isSuperAdmin()) {
+            return true;
+        }
+        return usuario.isFuncionario() && usuario.getIdInstitucion() != null
+                && usuario.getIdInstitucion() == doc.getIdInstitucion();
     }
 
     @Override

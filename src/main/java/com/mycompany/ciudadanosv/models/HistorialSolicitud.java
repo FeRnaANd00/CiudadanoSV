@@ -12,6 +12,7 @@ public class HistorialSolicitud {
     private String usuarioNombre;   // quién hizo el cambio
     private String usuarioRol;
     private LocalDateTime fecha;
+    private boolean interno;        // observación interna (solo funcionarios)
 
     public HistorialSolicitud() {
     }
@@ -46,4 +47,7 @@ public class HistorialSolicitud {
 
     public LocalDateTime getFecha() { return fecha; }
     public void setFecha(LocalDateTime fecha) { this.fecha = fecha; }
+
+    public boolean isInterno() { return interno; }
+    public void setInterno(boolean interno) { this.interno = interno; }
 }

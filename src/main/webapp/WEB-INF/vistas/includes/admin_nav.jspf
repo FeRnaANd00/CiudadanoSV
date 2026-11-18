@@ -1,0 +1,26 @@
+<%-- Menú de módulos de administración. Antes de incluir: <c:set var="moduloActivo" value="solicitudes|cupos|tramites|usuarios|panel"/> --%>
+<c:set var="ua" value="${sessionScope.usuario}"/>
+<nav class="flex gap-1 overflow-x-auto rounded-xl bg-surface-container-lowest border border-surface-container p-1" aria-label="Módulos de administración">
+  <c:set var="navBase" value="shrink-0 inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-label-sm whitespace-nowrap"/>
+  <c:set var="navOn" value="bg-primary text-white"/>
+  <c:set var="navOff" value="text-secondary hover:bg-surface-container-low hover:text-primary"/>
+  <a href="${ctx}/admin/inicio" class="${navBase += ' ' += (moduloActivo == 'panel' ? navOn : navOff)}">
+    <span class="material-symbols-outlined text-[18px]">monitoring</span> Panel
+  </a>
+  <a href="${ctx}/admin/solicitudes" class="${navBase += ' ' += (moduloActivo == 'solicitudes' ? navOn : navOff)}">
+    <span class="material-symbols-outlined text-[18px]">inbox</span> Solicitudes
+  </a>
+  <c:if test="${ua.puedeGestionarCupos}">
+    <a href="${ctx}/admin/cupos" class="${navBase += ' ' += (moduloActivo == 'cupos' ? navOn : navOff)}">
+      <span class="material-symbols-outlined text-[18px]">calendar_month</span> Citas y cupos
+    </a>
+  </c:if>
+  <c:if test="${ua.superAdmin}">
+    <a href="${ctx}/admin/tramites" class="${navBase += ' ' += (moduloActivo == 'tramites' ? navOn : navOff)}">
+      <span class="material-symbols-outlined text-[18px]">category</span> Trámites
+    </a>
+    <a href="${ctx}/admin/usuarios" class="${navBase += ' ' += (moduloActivo == 'usuarios' ? navOn : navOff)}">
+      <span class="material-symbols-outlined text-[18px]">group</span> Usuarios
+    </a>
+  </c:if>
+</nav>

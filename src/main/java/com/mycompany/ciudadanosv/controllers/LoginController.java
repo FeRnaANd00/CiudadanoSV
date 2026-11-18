@@ -57,6 +57,9 @@ public class LoginController extends HttpServlet {
         }
 
         prepararVista(request);
+        if ("1".equals(request.getParameter("suspendida"))) {
+            request.setAttribute("error", "Tu sesión se cerró porque la cuenta fue suspendida. Comunícate con el administrador.");
+        }
         request.getRequestDispatcher(VISTA).forward(request, response);
     }
 
@@ -120,7 +123,7 @@ public class LoginController extends HttpServlet {
             error = "El DUI debe tener el formato 00000000-0.";
         } else if (!telefono.matches("\\d{4}-\\d{4}")) {
             error = "El teléfono debe tener el formato 7000-0000.";
-        } else if (!correo.matches("^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$")) {
+        } else if (!correo.matches("^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$") || correo.length() > 120) {
             error = "Escribe un correo electrónico válido.";
         } else if (!Seguridad.claveEsSegura(clave)) {
             error = "La contraseña debe tener mínimo 8 caracteres, un número, una mayúscula y un símbolo.";

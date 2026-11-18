@@ -32,6 +32,11 @@ public class TramiteController extends HttpServlet {
             java.util.Map.entry("VMT-02", "/app/multas?tipo=placa")
     );
 
+    /** true si el trámite tiene un formulario programado (no se debe eliminar del catálogo). */
+    public static boolean tieneFormulario(String codigo) {
+        return codigo != null && FORMULARIOS.containsKey(codigo);
+    }
+
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {

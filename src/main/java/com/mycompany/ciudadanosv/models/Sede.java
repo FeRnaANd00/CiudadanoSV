@@ -9,6 +9,7 @@ public class Sede {
     private String nombre;
     private String municipioNombre;
     private String horario;
+    private String institucionSiglas;
 
     public Sede() {
     }
@@ -30,4 +31,7 @@ public class Sede {
 
     public String getHorario() { return horario; }
     public void setHorario(String horario) { this.horario = horario; }
+
+    public String getInstitucionSiglas() { return institucionSiglas; }
+    public void setInstitucionSiglas(String institucionSiglas) { this.institucionSiglas = institucionSiglas; }
 }

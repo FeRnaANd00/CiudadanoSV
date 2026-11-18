@@ -19,6 +19,10 @@ public class Tramite {
     private boolean requiereCita;
     private boolean requiereBiometria;
     private String estado;
+    // Catálogo (administración)
+    private int idInstitucion;
+    private int numRequisitos;
+    private int numSolicitudes;
 
     public Tramite() {
     }
@@ -74,4 +78,26 @@ public class Tramite {
 
     public String getEstado() { return estado; }
     public void setEstado(String estado) { this.estado = estado; }
+
+    public String getEstadoTexto() {
+        if (estado == null) {
+            return "";
+        }
+        return switch (estado) {
+            case "ACTIVO" -> "Activo";
+            case "EN_REVISION" -> "En revisión";
+            case "PROXIMAMENTE" -> "Próximamente";
+            case "INACTIVO" -> "Inactivo";
+            default -> estado;
+        };
+    }
+
+    public int getIdInstitucion() { return idInstitucion; }
+    public void setIdInstitucion(int idInstitucion) { this.idInstitucion = idInstitucion; }
+
+    public int getNumRequisitos() { return numRequisitos; }
+    public void setNumRequisitos(int numRequisitos) { this.numRequisitos = numRequisitos; }
+
+    public int getNumSolicitudes() { return numSolicitudes; }
+    public void setNumSolicitudes(int numSolicitudes) { this.numSolicitudes = numSolicitudes; }
 }

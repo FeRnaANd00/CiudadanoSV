@@ -22,7 +22,8 @@
 
    USUARIOS DE PRUEBA (datos ficticios)
      Super Admin : admin@ciudadano.sv               / Admin123*
-     Revisor     : douglas.morales@sv.gob.ficticio   / Revisor123*
+     Revisor     : douglas.morales@sv.gob.ficticio   / Revisor123*   (RNPN)
+     Operadora   : silvia.menjivar@sv.gob.ficticio   / Operador123*  (MINSAL)
      Ciudadano   : carlos.hernandez@sv.gob.ficticio  / Ciudadano123*
      (El ciudadano también puede entrar con su DUI: 04829104-5)
 
@@ -87,6 +88,15 @@ CREATE TABLE municipio (
   FOREIGN KEY (id_departamento) REFERENCES departamento(id_departamento)
 ) ENGINE=InnoDB;
 
+/* Distritos (antiguos municipios) de cada municipio. Pantalla: perfil.html (lugar de residencia) */
+CREATE TABLE distrito (
+  id_distrito     INT AUTO_INCREMENT PRIMARY KEY,
+  id_municipio    INT NOT NULL,
+  nombre          VARCHAR(80) NOT NULL,
+  UNIQUE (id_municipio, nombre),
+  FOREIGN KEY (id_municipio) REFERENCES municipio(id_municipio)
+) ENGINE=InnoDB;
+
 CREATE TABLE institucion (
   id_institucion  INT AUTO_INCREMENT PRIMARY KEY,
   siglas          VARCHAR(20)  NOT NULL UNIQUE,    -- RNPN, MINSAL, VMT...
@@ -127,6 +137,7 @@ CREATE TABLE usuario (
   estado_civil        ENUM('SOLTERO','CASADO','DIVORCIADO','VIUDO','ACOMPANADO'),
   direccion           VARCHAR(200),
   id_municipio        INT,
+  id_distrito         INT,                            -- distrito de residencia (dentro del municipio)
   -- Solo funcionarios:
   id_institucion      INT,
   id_sede             INT,
@@ -142,6 +153,7 @@ CREATE TABLE usuario (
   ultimo_cambio_clave DATETIME,
   FOREIGN KEY (id_rol)         REFERENCES rol(id_rol),
   FOREIGN KEY (id_municipio)   REFERENCES municipio(id_municipio),
+  FOREIGN KEY (id_distrito)    REFERENCES distrito(id_distrito),
   FOREIGN KEY (id_institucion) REFERENCES institucion(id_institucion),
   FOREIGN KEY (id_sede)        REFERENCES sede(id_sede)
 ) ENGINE=InnoDB;
@@ -434,7 +446,7 @@ INSERT INTO rol_permiso (id_rol, id_permiso) VALUES
  (3,2),(3,3),(3,6),
  (4,1),(4,2),(4,3),(4,4),(4,5),(4,6),(4,7),(4,8),(4,9);
 
--- Departamentos y municipios usados en las pantallas
+-- Departamentos y municipios (ids 1-11: los usados en las pantallas; el resto, a continuación)
 INSERT INTO departamento (id_departamento, nombre) VALUES
  (1,'San Salvador'),(2,'La Libertad'),(3,'Santa Ana'),(4,'San Miguel'),(5,'Sonsonate');
 
@@ -443,6 +455,74 @@ INSERT INTO municipio (id_municipio, id_departamento, nombre) VALUES
  (4,1,'San Salvador Sur'),(5,1,'San Salvador Norte'),
  (6,2,'La Libertad Sur'),(7,2,'La Libertad Este'),(8,2,'La Libertad Oeste'),
  (9,3,'Santa Ana Centro'),(10,4,'San Miguel Centro'),(11,5,'Sonsonate Centro');
+
+-- Resto del país (división territorial vigente desde 2024: 14 departamentos, 44 municipios)
+INSERT INTO departamento (id_departamento, nombre) VALUES
+ (6,'Ahuachapán'),(7,'Cabañas'),(8,'Chalatenango'),(9,'Cuscatlán'),(10,'La Paz'),
+ (11,'La Unión'),(12,'Morazán'),(13,'San Vicente'),(14,'Usulután');
+
+INSERT INTO municipio (id_municipio, id_departamento, nombre) VALUES
+ (12,6,'Ahuachapán Norte'),(13,6,'Ahuachapán Centro'),(14,6,'Ahuachapán Sur'),
+ (15,7,'Cabañas Este'),(16,7,'Cabañas Oeste'),
+ (17,8,'Chalatenango Norte'),(18,8,'Chalatenango Centro'),(19,8,'Chalatenango Sur'),
+ (20,9,'Cuscatlán Norte'),(21,9,'Cuscatlán Sur'),
+ (22,2,'La Libertad Norte'),(23,2,'La Libertad Centro'),(24,2,'La Libertad Costa'),
+ (25,10,'La Paz Oeste'),(26,10,'La Paz Centro'),(27,10,'La Paz Este'),
+ (28,11,'La Unión Norte'),(29,11,'La Unión Sur'),
+ (30,12,'Morazán Norte'),(31,12,'Morazán Sur'),
+ (32,4,'San Miguel Norte'),(33,4,'San Miguel Oeste'),
+ (34,13,'San Vicente Norte'),(35,13,'San Vicente Sur'),
+ (36,3,'Santa Ana Norte'),(37,3,'Santa Ana Este'),(38,3,'Santa Ana Oeste'),
+ (39,5,'Sonsonate Norte'),(40,5,'Sonsonate Este'),(41,5,'Sonsonate Oeste'),
+ (42,14,'Usulután Norte'),(43,14,'Usulután Este'),(44,14,'Usulután Oeste');
+
+-- Distritos de cada municipio
+-- 262 distritos
+INSERT INTO distrito (id_municipio, nombre) VALUES
+ (1,'Ayutuxtepeque'),(1,'Mejicanos'),(1,'Cuscatancingo'),(1,'Delgado'),(1,'San Salvador'),(2,'Ilopango'),
+ (2,'San Martín'),(2,'Soyapango'),(2,'Tonacatepeque'),(3,'Apopa'),(3,'Nejapa'),(4,'San Marcos'),
+ (4,'Santo Tomás'),(4,'Santiago Texacuangos'),(4,'Panchimalco'),(4,'Rosario de Mora'),(5,'Aguilares'),(5,'El Paisnal'),
+ (5,'Guazapa'),(6,'Santa Tecla'),(6,'Comasagua'),(7,'Antiguo Cuscatlán'),(7,'Huizúcar'),(7,'Nuevo Cuscatlán'),
+ (7,'San José Villanueva'),(7,'Zaragoza'),(8,'Colón'),(8,'Jayaque'),(8,'Sacacoyo'),(8,'Tepecoyo'),
+ (8,'Talnique'),(9,'Santa Ana'),(10,'San Miguel'),(10,'Comacarán'),(10,'Uluazapa'),(10,'Moncagua'),
+ (10,'Quelepa'),(10,'Chirilagua'),(11,'Sonsonate'),(11,'Sonzacate'),(11,'Nahulingo'),(11,'San Antonio del Monte'),
+ (11,'Santo Domingo de Guzmán'),(12,'Atiquizaya'),(12,'El Refugio'),(12,'San Lorenzo'),(12,'Turín'),(13,'Ahuachapán'),
+ (13,'Apaneca'),(13,'Concepción de Ataco'),(13,'Tacuba'),(14,'Guaymango'),(14,'Jujutla'),(14,'San Francisco Menéndez'),
+ (14,'San Pedro Puxtla'),(15,'Guacotecti'),(15,'San Isidro'),(15,'Sensuntepeque'),(15,'Victoria'),(15,'Dolores'),
+ (16,'Cinquera'),(16,'Ilobasco'),(16,'Jutiapa'),(16,'Tejutepeque'),(17,'Citalá'),(17,'La Palma'),
+ (17,'San Ignacio'),(18,'Agua Caliente'),(18,'Dulce Nombre de María'),(18,'El Paraíso'),(18,'La Reina'),(18,'Nueva Concepción'),
+ (18,'San Fernando'),(18,'San Francisco Morazán'),(18,'San Rafael'),(18,'Santa Rita'),(18,'Tejutla'),(19,'Arcatao'),
+ (19,'Azacualpa'),(19,'Cancasque'),(19,'Chalatenango'),(19,'Comalapa'),(19,'Concepción Quezaltepeque'),(19,'El Carrizal'),
+ (19,'La Laguna'),(19,'Las Vueltas'),(19,'Las Flores'),(19,'Nombre de Jesús'),(19,'Nueva Trinidad'),(19,'Ojos de Agua'),
+ (19,'Potonico'),(19,'San Antonio de la Cruz'),(19,'San Antonio Los Ranchos'),(19,'San Francisco Lempa'),(19,'San Isidro Labrador'),(19,'San Luis del Carmen'),
+ (19,'San Miguel de Mercedes'),(20,'Suchitoto'),(20,'San José Guayabal'),(20,'Oratorio de Concepción'),(20,'San Bartolomé Perulapía'),(20,'San Pedro Perulapán'),
+ (21,'Cojutepeque'),(21,'Candelaria'),(21,'El Carmen'),(21,'El Rosario'),(21,'Monte San Juan'),(21,'San Cristóbal'),
+ (21,'San Rafael Cedros'),(21,'San Ramón'),(21,'Santa Cruz Analquito'),(21,'Santa Cruz Michapa'),(21,'Tenancingo'),(22,'Quezaltepeque'),
+ (22,'San Matías'),(22,'San Pablo Tacachico'),(23,'San Juan Opico'),(23,'Ciudad Arce'),(24,'Chiltiupán'),(24,'Jicalapa'),
+ (24,'La Libertad'),(24,'Tamanique'),(24,'Teotepeque'),(25,'Cuyultitán'),(25,'Olocuilta'),(25,'San Juan Talpa'),
+ (25,'San Luis Talpa'),(25,'San Pedro Masahuat'),(25,'Tapalhuaca'),(25,'San Francisco Chinameca'),(26,'El Rosario'),(26,'Jerusalén'),
+ (26,'Mercedes La Ceiba'),(26,'Paraíso de Osorio'),(26,'San Antonio Masahuat'),(26,'San Emigdio'),(26,'San Juan Tepezontes'),(26,'San Luis La Herradura'),
+ (26,'San Miguel Tepezontes'),(26,'San Pedro Nonualco'),(26,'Santa María Ostuma'),(26,'Santiago Nonualco'),(27,'San Juan Nonualco'),(27,'San Rafael Obrajuelo'),
+ (27,'Zacatecoluca'),(28,'Anamorós'),(28,'Bolívar'),(28,'Concepción de Oriente'),(28,'El Sauce'),(28,'Lislique'),
+ (28,'Nueva Esparta'),(28,'Pasaquina'),(28,'Polorós'),(28,'San José'),(28,'Santa Rosa de Lima'),(29,'Conchagua'),
+ (29,'El Carmen'),(29,'Intipucá'),(29,'La Unión'),(29,'Meanguera del Golfo'),(29,'San Alejo'),(29,'Yayantique'),
+ (29,'Yucuaiquín'),(30,'Arambala'),(30,'Cacaopera'),(30,'Corinto'),(30,'El Rosario'),(30,'Joateca'),
+ (30,'Jocoaitique'),(30,'Meanguera'),(30,'Perquín'),(30,'San Fernando'),(30,'San Isidro'),(30,'Torola'),
+ (31,'Chilanga'),(31,'Delicias de Concepción'),(31,'El Divisadero'),(31,'Gualococti'),(31,'Guatajiagua'),(31,'Jocoro'),
+ (31,'Lolotiquillo'),(31,'Osicala'),(31,'San Carlos'),(31,'San Francisco Gotera'),(31,'San Simón'),(31,'Sensembra'),
+ (31,'Sociedad'),(31,'Yamabal'),(31,'Yoloaiquín'),(32,'Ciudad Barrios'),(32,'Sesori'),(32,'Nuevo Edén de San Juan'),
+ (32,'San Gerardo'),(32,'San Luis de la Reina'),(32,'Carolina'),(32,'San Antonio'),(32,'Chapeltique'),(33,'Chinameca'),
+ (33,'El Tránsito'),(33,'Lolotique'),(33,'Nueva Guadalupe'),(33,'San Jorge'),(33,'San Rafael Oriente'),(34,'Apastepeque'),
+ (34,'Santa Clara'),(34,'San Ildefonso'),(34,'San Esteban Catarina'),(34,'San Sebastián'),(34,'San Lorenzo'),(34,'Santo Domingo'),
+ (35,'San Vicente'),(35,'Guadalupe'),(35,'San Cayetano Istepeque'),(35,'Tecoluca'),(35,'Tepetitán'),(35,'Verapaz'),
+ (36,'Masahuat'),(36,'Metapán'),(36,'Santa Rosa Guachipilín'),(36,'Texistepeque'),(37,'Coatepeque'),(37,'El Congo'),
+ (38,'Candelaria de la Frontera'),(38,'Chalchuapa'),(38,'El Porvenir'),(38,'San Antonio Pajonal'),(38,'San Sebastián Salitrillo'),(38,'Santiago de la Frontera'),
+ (39,'Juayúa'),(39,'Nahuizalco'),(39,'Salcoatitán'),(39,'Santa Catarina Masahuat'),(40,'Armenia'),(40,'Caluco'),
+ (40,'Cuisnahuat'),(40,'Izalco'),(40,'San Julián'),(40,'Santa Isabel Ishuatán'),(41,'Acajutla'),(42,'Alegría'),
+ (42,'Berlín'),(42,'El Triunfo'),(42,'Estanzuelas'),(42,'Jucuapa'),(42,'Mercedes Umaña'),(42,'Nueva Granada'),
+ (42,'San Buenaventura'),(42,'Santiago de María'),(43,'California'),(43,'Concepción Batres'),(43,'Ereguayquín'),(43,'Jucuarán'),
+ (43,'Ozatlán'),(43,'Santa Elena'),(43,'San Dionisio'),(43,'Santa María'),(43,'Tecapán'),(43,'Usulután'),
+ (44,'Jiquilisco'),(44,'Puerto El Triunfo'),(44,'San Agustín'),(44,'San Francisco Javier');
 
 -- Instituciones
 INSERT INTO institucion (id_institucion, siglas, nombre) VALUES
@@ -503,6 +583,10 @@ INSERT INTO requisito (id_tramite, nombre, descripcion, obligatorio, requiere_ar
  (1,'Comprobante de domicilio reciente',  'Recibo de energía eléctrica o agua no mayor a 3 meses',TRUE, TRUE,'MANUAL'),
  (1,'Fotografía digital en ventanilla',   'Se captura en el Duicentro sin costo adicional',FALSE,FALSE,'PRESENCIAL');
 
+-- Requisitos (Reposición de DUI por deterioro: los mismos de la renovación)
+INSERT INTO requisito (id_tramite, nombre, descripcion, obligatorio, requiere_archivo, tipo_validacion)
+SELECT 2, nombre, descripcion, obligatorio, requiere_archivo, tipo_validacion FROM requisito WHERE id_tramite = 1;
+
 -- Catálogo de infracciones
 INSERT INTO tipo_infraccion (id_tipo_infraccion, codigo, descripcion, gravedad, monto) VALUES
  (1,'TO-01','Estacionar en zona señalizada como eje preferencial o parada de transporte colectivo.','MUY_GRAVE',57.14),
@@ -532,6 +616,17 @@ INSERT INTO usuario (id_usuario, id_rol, dui, nombre_completo, correo, telefono,
   '0123456789abcdef0123456789abcdef',
   SHA2(CONCAT('0123456789abcdef0123456789abcdef','Ciudadano123*'),256),
   '1991-03-18', 'SOLTERO', 'Colonia Escalón, Pasaje Las Palmeras #124', 1, 2, TRUE, 'ACTIVO');
+UPDATE usuario SET id_distrito = (SELECT id_distrito FROM distrito WHERE id_municipio = 1 AND nombre = 'San Salvador')
+WHERE id_usuario = 3;
+
+-- Operadora de agenda (MINSAL, Unidad de Salud Arce)
+INSERT INTO usuario (id_usuario, id_rol, dui, nombre_completo, correo, telefono,
+                     clave_salt, clave_hash, id_institucion, id_sede, cargo,
+                     nivel_verificacion, estado) VALUES
+ (4, 3, '09999999-9', 'Silvia Margarita Menjívar', 'silvia.menjivar@sv.gob.ficticio', '7111-2222',
+  '5a6b7c8d9e0f1a2b3c4d5e6f7a8b9c0d',
+  SHA2(CONCAT('5a6b7c8d9e0f1a2b3c4d5e6f7a8b9c0d','Operador123*'),256),
+  2, 7, 'Operadora de agenda MINSAL', 2, 'ACTIVO');
 
 -- Solicitud de renovación de DUI (EXP-2024-00891)
 INSERT INTO solicitud (id_solicitud, folio, id_usuario, id_tramite, id_sede, id_revisor, estado,
@@ -600,7 +695,7 @@ INSERT INTO sesion_dispositivo (id_usuario, dispositivo, ubicacion, activa) VALU
 
 
 /* =====================================================================
-   11. VERIFICACIÓN RÁPIDA (debe listar 24 tablas y 3 usuarios)
+   11. VERIFICACIÓN RÁPIDA (debe listar 25 tablas y 4 usuarios)
    ===================================================================== */
 SHOW TABLES;
 SELECT u.id_usuario, u.dui, u.nombre_completo, u.correo, r.nombre AS rol

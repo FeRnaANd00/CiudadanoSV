@@ -24,6 +24,19 @@ public class Solicitud {
     private String observacionCiudadano;
     private LocalDateTime fechaCreacion;
     private LocalDateTime fechaActualizacion;
+    // Datos que usa la administración (bandeja y detalle)
+    private int idInstitucion;
+    private Integer idSede;
+    private Integer idRevisor;
+    private boolean requiereBiometria;
+    private String observacionInterna;
+    private String ciudadanoNombre;
+    private String ciudadanoDui;
+    private String ciudadanoCorreo;
+    private String ciudadanoTelefono;
+    private String ciudadanoFechaNacimiento;   // "18/03/1991 (35 años)"
+    private String ciudadanoResidencia;        // "Distrito, Municipio, Departamento — dirección"
+    private LocalDateTime fechaResolucion;
 
     public Solicitud() {
     }
@@ -90,6 +103,55 @@ public class Solicitud {
         };
     }
 
+    /** Sigue abierta (el funcionario aún debe hacer algo). */
+    public boolean isAbierta() {
+        return "RECIBIDA".equals(estado) || "EN_REVISION".equals(estado) || "CITA_PROGRAMADA".equals(estado);
+    }
+
+    /** Horas desde que se envió (para "24 h en cola"). */
+    public long getHorasEnCola() {
+        return fechaCreacion == null ? 0 : java.time.Duration.between(fechaCreacion, LocalDateTime.now()).toHours();
+    }
+
+    /** "3 h", "2 d" ... tiempo en cola de una solicitud abierta. */
+    public String getTiempoEnColaTexto() {
+        long h = getHorasEnCola();
+        return h < 24 ? h + " h" : (h / 24) + " d";
+    }
+
+    /** Abierta hace más de 24 horas: prioridad alta en la bandeja. */
+    public boolean isPrioridadAlta() {
+        return isAbierta() && getHorasEnCola() >= 24;
+    }
+
+    /**
+     * Estados a los que el funcionario puede pasarla desde el actual.
+     * CITA_PROGRAMADA no aparece: se llega a ella al programar la cita biométrica.
+     */
+    public java.util.List<String> getEstadosSiguientes() {
+        if (estado == null) {
+            return java.util.List.of();
+        }
+        return switch (estado) {
+            case "RECIBIDA" -> java.util.List.of("EN_REVISION", "RECHAZADA");
+            case "EN_REVISION" -> requiereBiometria
+                    ? java.util.List.of("RECHAZADA")
+                    : java.util.List.of("APROBADA", "RECHAZADA");
+            case "CITA_PROGRAMADA" -> java.util.List.of("APROBADA", "RECHAZADA");
+            case "APROBADA" -> java.util.List.of("FINALIZADA");
+            default -> java.util.List.of();
+        };
+    }
+
+    /** Se puede programar la cita biométrica (trámite con biometría y solicitud en revisión). */
+    public boolean isPuedeProgramarCita() {
+        return requiereBiometria && "EN_REVISION".equals(estado) && idSede != null;
+    }
+
+    public String getFechaResolucionTexto() {
+        return Fechas.formatearFechaHora(fechaResolucion);
+    }
+
     public String getFechaCreacionTexto() {
         return Fechas.formatearFechaHora(fechaCreacion);
     }
@@ -151,4 +213,40 @@ public class Solicitud {
 
     public LocalDateTime getFechaActualizacion() { return fechaActualizacion; }
     public void setFechaActualizacion(LocalDateTime fechaActualizacion) { this.fechaActualizacion = fechaActualizacion; }
+
+    public int getIdInstitucion() { return idInstitucion; }
+    public void setIdInstitucion(int idInstitucion) { this.idInstitucion = idInstitucion; }
+
+    public Integer getIdSede() { return idSede; }
+    public void setIdSede(Integer idSede) { this.idSede = idSede; }
+
+    public Integer getIdRevisor() { return idRevisor; }
+    public void setIdRevisor(Integer idRevisor) { this.idRevisor = idRevisor; }
+
+    public boolean isRequiereBiometria() { return requiereBiometria; }
+    public void setRequiereBiometria(boolean requiereBiometria) { this.requiereBiometria = requiereBiometria; }
+
+    public String getObservacionInterna() { return observacionInterna; }
+    public void setObservacionInterna(String observacionInterna) { this.observacionInterna = observacionInterna; }
+
+    public String getCiudadanoNombre() { return ciudadanoNombre; }
+    public void setCiudadanoNombre(String ciudadanoNombre) { this.ciudadanoNombre = ciudadanoNombre; }
+
+    public String getCiudadanoDui() { return ciudadanoDui; }
+    public void setCiudadanoDui(String ciudadanoDui) { this.ciudadanoDui = ciudadanoDui; }
+
+    public String getCiudadanoCorreo() { return ciudadanoCorreo; }
+    public void setCiudadanoCorreo(String ciudadanoCorreo) { this.ciudadanoCorreo = ciudadanoCorreo; }
+
+    public String getCiudadanoTelefono() { return ciudadanoTelefono; }
+    public void setCiudadanoTelefono(String ciudadanoTelefono) { this.ciudadanoTelefono = ciudadanoTelefono; }
+
+    public String getCiudadanoFechaNacimiento() { return ciudadanoFechaNacimiento; }
+    public void setCiudadanoFechaNacimiento(String ciudadanoFechaNacimiento) { this.ciudadanoFechaNacimiento = ciudadanoFechaNacimiento; }
+
+    public String getCiudadanoResidencia() { return ciudadanoResidencia; }
+    public void setCiudadanoResidencia(String ciudadanoResidencia) { this.ciudadanoResidencia = ciudadanoResidencia; }
+
+    public LocalDateTime getFechaResolucion() { return fechaResolucion; }
+    public void setFechaResolucion(LocalDateTime fechaResolucion) { this.fechaResolucion = fechaResolucion; }
 }
